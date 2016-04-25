@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <time.h>
 
-#define FILE_TRAIN_IMAGE	"train-images-idx3-ubyte"
-#define FILE_TRAIN_LABEL	"train-labels-idx1-ubyte"
+#define FILE_TRAIN_IMAGE		"train-images-idx3-ubyte"
+#define FILE_TRAIN_LABEL		"train-labels-idx1-ubyte"
 #define FILE_TEST_IMAGE		"t10k-images-idx3-ubyte"
 #define FILE_TEST_LABEL		"t10k-labels-idx1-ubyte"
 #define LENET_FILE 		"lenet-5.data"
