@@ -7,9 +7,9 @@
 #define FILE_TRAIN_LABEL	"train-labels-idx1-ubyte"
 #define FILE_TEST_IMAGE		"t10k-images-idx3-ubyte"
 #define FILE_TEST_LABEL		"t10k-labels-idx1-ubyte"
-#define LENET_FILE "lenet-5.data"
-#define COUNT_TRAIN	60000
-#define COUNT_TEST	10000
+#define LENET_FILE 		"lenet-5.data"
+#define COUNT_TRAIN		60000
+#define COUNT_TEST		10000
 
 
 
