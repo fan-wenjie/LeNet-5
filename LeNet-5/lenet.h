@@ -56,10 +56,10 @@ typedef struct Feature
 	double value6[LAYER6][LENGTH_FEATURE6][LENGTH_FEATURE6];
 }Feature;
 
-void TrainBatch(LeNet5 *lenet, LeNet5 deltas[], image *input, uint8 *result, int batchSize);
+void TrainBatch(LeNet5 *lenet, image *input, uint8 *result, int batchSize);
 
 void Train(LeNet5 *lenet, image input, uint8 result);
 
-uint8 Predict(LeNet5 *lenet, Feature *features, image input);
+uint8 Predict(LeNet5 *lenet, image input);
 
 void Initial(LeNet5 *lenet, double(*rand)());

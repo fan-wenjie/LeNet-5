@@ -80,6 +80,8 @@
     <Link>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <StackReserveSize>8388608</StackReserveSize>
+      <StackCommitSize>8388608</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -93,6 +95,8 @@
     <Link>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <StackReserveSize>8388608</StackReserveSize>
+      <StackCommitSize>8388608</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,6 +114,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <StackReserveSize>8388608</StackReserveSize>
+      <StackCommitSize>8388608</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,6 +133,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>
       </AdditionalDependencies>
+      <StackReserveSize>8388608</StackReserveSize>
+      <StackCommitSize>8388608</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

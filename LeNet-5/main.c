@@ -46,31 +46,27 @@ double double_random()
 }
 
 
-void training(LeNet5 *lenet, image *train_data, uint8 *train_label, int batch_size,int total_size)
+void training(LeNet5 *lenet, image *train_data, uint8 *train_label, int batch_size, int total_size)
 {
-	LeNet5 *deltas = (LeNet5 *)calloc(sizeof(LeNet5), batch_size);
-	for (int i = 0,percent = 0; i < total_size; i += batch_size)
+	for (int i = 0, percent = 0; i <= total_size - batch_size; i += batch_size)
 	{
-		TrainBatch(lenet, deltas, train_data + i, train_label + i, batch_size);
+		TrainBatch(lenet, train_data + i, train_label + i, batch_size);
 		if (i * 100 / total_size > percent)
-			printf("batchsize:%d\ttrain:%2d%%\n",batch_size, percent = i * 100 / total_size);
+			printf("batchsize:%d\ttrain:%2d%%\n", batch_size, percent = i * 100 / total_size);
 	}
-	free(deltas);
 }
 
 int testing(LeNet5 *lenet, image *test_data, uint8 *test_label,int total_size)
 {
-	Feature *features = (Feature *)malloc(sizeof(Feature));
 	int right = 0, percent = 0;
 	for (int i = 0; i < total_size; ++i)
 	{
 		uint8 l = test_label[i];
-		uint8 p = Predict(lenet, features, test_data[i]);
+		uint8 p = Predict(lenet, test_data[i]);
 		right += l == p;
 		if (i * 100 / total_size > percent)
 			printf("test:%2d%%\n", percent = i * 100 / total_size);
 	}
-	free(features);
 	return right;
 }
 

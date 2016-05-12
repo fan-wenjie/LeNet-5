@@ -1,7 +1,7 @@
 #include "lenet.h"
 #include <math.h>
 #include <memory.h>
-#include <omp.h>
+
 
 /*
 @author : ·¶ÎÄ½Ý
@@ -166,20 +166,6 @@ static void backward(LeNet5 *lenet, LeNet5 *deltas, Feature *errors, Feature *fe
 	CNN_BACKWARD(features->value0, errors->value0, errors->value1, lenet->weight0_1, deltas->weight0_1, deltas->bias0_1, actiondiff, FOREACH_CONNECT_FULL, CONVOLUTE_FULL, CONVOLUTE_VALID);
 }
 
-static void update(LeNet5 *lenet, LeNet5 deltas[], double alpha, int count)
-{
-	double k = alpha / count;
-	double buffer[GETCOUNT(LeNet5)] = { 0 };
-	FOREACH(i, count)
-	{
-		double *pos = (double *)(deltas + i);
-		FOREACH(j, GETCOUNT(LeNet5))
-			buffer[j] += pos[j];
-	}
-	FOREACH(i, GETCOUNT(LeNet5))
-		((double *)lenet)[i] += k * buffer[i];
-}
-
 static void load_input(Feature *features, image input)
 {
 	normalize((uint8 *)input, (double *)features->value0, sizeof(image) / sizeof(uint8));
@@ -212,21 +198,43 @@ static uint8 get_result(Feature *features)
 	return (uint8)result;
 }
 
-void TrainBatch(LeNet5* lenet, LeNet5 deltas[], image * input, uint8 * result, int batchSize)
+void TrainBatch(LeNet5* lenet, image * input, uint8 * result, int batchSize)
 {
-	memset(deltas, 0, sizeof(LeNet5)*batchSize);
+	double buffer[GETCOUNT(LeNet5)] = { 0 };
+#ifdef  _OPENMP
+#include <omp.h>
+	omp_lock_t lock;
+	omp_init_lock(&lock);
 	int i = 0;
 #pragma omp parallel for
-	for (i = 0; i < batchSize;++i)
+	for (i = 0; i < batchSize; ++i)
+	{
+		Feature features = { 0 };
+		Feature errors = { 0 };
+		LeNet5	deltas = { 0 };
+		load_input(&features, input[i]);
+		forward(lenet, &features, tanh);
+		load_target(&features, &errors, result[i], tanhdiff);
+		backward(lenet, &deltas, &errors, &features, tanhdiff);
+		omp_set_lock(&lock);
+		FOREACH(j, GETCOUNT(LeNet5))
+			buffer[j] += ((double *)&deltas)[j];
+		omp_unset_lock(&lock);
+	}
+#else
+	FOREACH(i, batchSize)
 	{
 		Feature features = { 0 };
 		Feature errors = { 0 };
 		load_input(&features, input[i]);
 		forward(lenet, &features, tanh);
-		load_target(&features,&errors,result[i], tanhdiff);
-		backward(lenet, deltas + i, &errors, &features, tanhdiff);
+		load_target(&features, &errors, result[i], tanhdiff);
+		backward(lenet, (LeNet5 *)buffer, &errors, &features, tanhdiff);
 	}
-	update(lenet, deltas, ALPHA, batchSize);
+#endif //  _OPENMP
+	double k = ALPHA / batchSize;
+	FOREACH(i, GETCOUNT(LeNet5))
+		((double *)lenet)[i] += k * buffer[i];
 }
 
 void Train(LeNet5 *lenet, image input, uint8 result)
@@ -238,15 +246,16 @@ void Train(LeNet5 *lenet, image input, uint8 result)
 	forward(lenet, &features, tanh);
 	load_target(&features, &errors, result, tanhdiff);
 	backward(lenet, &deltas, &errors, &features, tanhdiff);
-	update(lenet, &deltas, ALPHA, 1);
+	FOREACH(i, GETCOUNT(LeNet5))
+		((double *)lenet)[i] += ALPHA * ((double *)&deltas)[i];
 }
 
-uint8 Predict(LeNet5 *lenet, Feature *features, image input)
+uint8 Predict(LeNet5 *lenet, image input)
 {
-	memset(features, 0, sizeof(Feature));
-	load_input(features, input);
-	forward(lenet, features, tanh);
-	return get_result(features);
+	Feature features = { 0 };
+	load_input(&features, input);
+	forward(lenet, &features, tanh);
+	return get_result(&features);
 }
 
 void Initial(LeNet5 *lenet, double(*rand)())
