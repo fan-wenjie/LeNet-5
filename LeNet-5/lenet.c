@@ -221,6 +221,7 @@ void TrainBatch(LeNet5* lenet, image * input, uint8 * result, int batchSize)
 			buffer[j] += ((double *)&deltas)[j];
 		omp_unset_lock(&lock);
 	}
+	omp_destroy_lock(&lock);
 #else
 	FOREACH(i, batchSize)
 	{
