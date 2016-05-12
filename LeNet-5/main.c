@@ -13,20 +13,18 @@
 
 
 
-errno_t read_data(unsigned char(*data)[28][28], unsigned char label[], const int count, const char data_file[], const char label_file[])
+int read_data(unsigned char(*data)[28][28], unsigned char label[], const int count, const char data_file[], const char label_file[])
 {
-	FILE *fp_image = 0, *fp_label = 0;
-	errno_t err = 0;
-	if (err = fopen_s(&fp_image, data_file, "rb")
-		|| fopen_s(&fp_label, label_file, "rb"))
-		return err;
+    FILE *fp_image = fopen(data_file, "rb");
+    FILE *fp_label = fopen(label_file, "rb");
+    if (!fp_image||!fp_label) return 1;
 	fseek(fp_image, 16, SEEK_SET);
 	fseek(fp_label, 8, SEEK_SET);
-	fread_s(data, sizeof(*data)*count, sizeof(*data)*count, 1, fp_image);
-	fread_s(label, count, count, 1, fp_label);
+	fread(data, sizeof(*data)*count, 1, fp_image);
+	fread(label,count, 1, fp_label);
 	fclose(fp_image);
 	fclose(fp_label);
-	return err;
+	return 0;
 }
 
 double double_random()
@@ -72,9 +70,8 @@ int testing(LeNet5 *lenet, image *test_data, uint8 *test_label,int total_size)
 
 errno_t save(LeNet5 *lenet, char filename[])
 {
-	FILE *fp = 0;
-	errno_t err = fopen_s(&fp, filename, "wb");
-	if (err) return err;
+	FILE *fp = fopen(filename, "wb");
+	if (!fp) return 1;
 	fwrite(lenet, sizeof(LeNet5), 1, fp);
 	fclose(fp);
 	return 0;
@@ -82,10 +79,9 @@ errno_t save(LeNet5 *lenet, char filename[])
 
 errno_t load(LeNet5 *lenet, char filename[])
 {
-	FILE *fp = 0;
-	errno_t err = fopen_s(&fp, filename, "rb");
-	if (err) return err;
-	fread_s(lenet, sizeof(LeNet5), sizeof(LeNet5), 1, fp);
+	FILE *fp = fopen(filename, "rb");
+	if (!fp) return 1;
+	fread(lenet, sizeof(LeNet5), 1, fp);
 	fclose(fp);
 	return 0;
 }
@@ -123,7 +119,7 @@ void foo()
 		training(lenet, train_data, train_label, batches[i],COUNT_TRAIN);
 	int right = testing(lenet, test_data, test_label, COUNT_TEST);
 	printf("%d/%d\n", right, COUNT_TEST);
-	printf("Time:%dms\n", clock() - start);
+	printf("Time:%u\n", (unsigned)(clock() - start));
 	save(lenet, LENET_FILE);
 	free(lenet);
 	free(train_data);
