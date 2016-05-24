@@ -4,21 +4,21 @@
 
 
 /*
-@author : ·¶ÎÄ½İ
+@author : èŒƒæ–‡æ·
 @data	: 2016-04-20
-@note	: ¸ù¾İYann LecunµÄÂÛÎÄ¡¶Gradient-based Learning Applied To Document Recognition¡·¸´¿Ì
+@note	: æ ¹æ®Yann Lecunçš„è®ºæ–‡ã€ŠGradient-based Learning Applied To Document Recognitionã€‹å¤åˆ»
 @api	:
 
-ÅúÁ¿ÑµÁ·
+æ‰¹é‡è®­ç»ƒ
 void TrainBatch(LeNet5 *lenet, LeNet5 deltas[], image *input, uint8 *result, int batchSize);
 
-ÑµÁ·
+è®­ç»ƒ
 void Train(LeNet5 *lenet, image input, uint8 result);
 
-Ô¤²â
+é¢„æµ‹
 uint8 Predict(LeNet5 *lenet, Feature *features, image input);
 
-³õÊ¼»¯
+åˆå§‹åŒ–
 void Initial(LeNet5 *lenet, double(*rand)());
 */
 
@@ -203,8 +203,6 @@ void TrainBatch(LeNet5* lenet, image * input, uint8 * result, int batchSize)
 	double buffer[GETCOUNT(LeNet5)] = { 0 };
 #ifdef  _OPENMP
 #include <omp.h>
-	omp_lock_t lock;
-	omp_init_lock(&lock);
 	int i = 0;
 #pragma omp parallel for
 	for (i = 0; i < batchSize; ++i)
@@ -216,12 +214,12 @@ void TrainBatch(LeNet5* lenet, image * input, uint8 * result, int batchSize)
 		forward(lenet, &features, tanh);
 		load_target(&features, &errors, result[i], tanhdiff);
 		backward(lenet, &deltas, &errors, &features, tanhdiff);
-		omp_set_lock(&lock);
+		#pragma omp critical
+		{
 		FOREACH(j, GETCOUNT(LeNet5))
 			buffer[j] += ((double *)&deltas)[j];
-		omp_unset_lock(&lock);
+		}
 	}
-	omp_destroy_lock(&lock);
 #else
 	FOREACH(i, batchSize)
 	{
