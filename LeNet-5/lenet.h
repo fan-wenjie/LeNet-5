@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define LENGTH_KERNEL0	5
 #define LENGTH_KERNEL1	4

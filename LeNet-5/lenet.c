@@ -1,4 +1,4 @@
-#include "lenet.h"
+﻿#include "lenet.h"
 #include <math.h>
 #include <memory.h>
 
@@ -54,20 +54,22 @@ const static char label[LAYER7][LAYER6] =
 
 #define FOREACH(i,count) for (int i = 0; i < count; ++i)
 
-#define FOREACH_CONNECT_ONE(x,y,weight,wpos)													\
-	for (int x = 0 ,y = 0; x < GETLENGTH(weight); ++x,++y)										\
-		for(double(*wpos)[GETLENGTH(*weight)][GETLENGTH(**weight)] = weight + x;wpos;wpos=0)	\
+#define FOREACH_CONNECT_ONE(x,y,weight,wpos)											\
+	for(double(*wpos)[GETLENGTH(*weight)][GETLENGTH(**weight)] = weight; wpos; wpos = 0)\
+		for (int x = 0 ,y = 0; x < GETLENGTH(weight) && (wpos = weight + x); ++x,++y)	\
 
-#define FOREACH_CONNECT_6x16(x,y,weight,wpos)																	\
-	FOREACH(x,GETLENGTH(weight))																				\
-		FOREACH(y,GETLENGTH(*(weight)))																			\
-			if (connect2_3[x][y])																				\
-				for (double(*wpos)[GETLENGTH(**weight)][GETLENGTH(***weight)] = *(weight + x) + y;wpos;wpos=0)	\
 
-#define FOREACH_CONNECT_FULL(x,y,weight,wpos)																\
-	FOREACH(x,GETLENGTH(weight))																			\
-		FOREACH(y,GETLENGTH(*(weight)))																		\
-			for (double(*wpos)[GETLENGTH(**weight)][GETLENGTH(***weight)] = *(weight + x) + y;wpos;wpos=0)	\
+#define FOREACH_CONNECT_6x16(x,y,weight,wpos)												\
+	for (double(*wpos)[GETLENGTH(**weight)][GETLENGTH(***weight)] = *weight; wpos; wpos = 0)\
+		for(int x = 0; x < GETLENGTH(weight); ++x)											\
+			for(int y = 0; y < GETLENGTH(*(weight)) && (wpos = *(weight + x) + y); ++y)		\
+				if (connect2_3[x][y])														\
+				
+
+#define FOREACH_CONNECT_FULL(x,y,weight,wpos)												\
+	for (double(*wpos)[GETLENGTH(**weight)][GETLENGTH(***weight)] = *weight; wpos; wpos = 0)\
+		for(int x = 0; x < GETLENGTH(weight); ++x)											\
+			for(int y = 0; y < GETLENGTH(*(weight)) && (wpos = *(weight + x) + y); ++y)		\
 
 #define CONVOLUTE_VALID(input,output,weight)											\
 {																						\
@@ -215,10 +217,8 @@ void TrainBatch(LeNet5* lenet, image * input, uint8 * result, int batchSize)
 		load_target(&features, &errors, result[i], tanhdiff);
 		backward(lenet, &deltas, &errors, &features, tanhdiff);
 		#pragma omp critical
-		{
 		FOREACH(j, GETCOUNT(LeNet5))
 			buffer[j] += ((double *)&deltas)[j];
-		}
 	}
 #else
 	FOREACH(i, batchSize)
